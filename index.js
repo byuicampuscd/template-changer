@@ -23,7 +23,7 @@
 
       //check for correct lenghts
       if (!hasACorrectLength) {
-         parsed.err = 'The parameters are missing or are not in the correct format.';
+         parsed.err = 'The paramitiers are missing or are not in the correct format.';
          return parsed;
       }
 
