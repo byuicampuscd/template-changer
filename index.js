@@ -23,7 +23,7 @@
 
       //check for correct lenghts
       if (!hasACorrectLength) {
-         parsed.err = 'The paramitiers are missing or are not in the correct format.';
+         parsed.err = 'The parameters are missing or are not in the correct format.';
          return parsed;
       }
 
@@ -40,7 +40,7 @@
             parsed.templateFileName = args[4];
             parsed.mode = enums.mode.IF;
          } else {
-            parsed.err = 'There are 5 paramitiers but they are not in the correct format.';
+            parsed.err = 'There are 5 parameters but they are not in the correct format.';
          }
       } else if (args.length === 7) {
          if (args[1].toUpperCase() === 'IF' && args[3].toUpperCase() === 'THEN' && args[5].toUpperCase() === 'ELSE') {
