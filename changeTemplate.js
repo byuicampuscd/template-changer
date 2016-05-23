@@ -16,6 +16,7 @@ function processTemplate(name, text, options, templates) {
          templateUsed: ""
       },
       hasMatchInFile;
+
    function fixTitleTag(templateTopIn){
       var templateTop = htmlParse.load(templateTopIn),
           title = templateTop('title');
@@ -26,7 +27,7 @@ function processTemplate(name, text, options, templates) {
    }
 
    function run(template) {
-      objOut.textOut = prettyHtml(template.top + '\n' + $(options.selector).html() + '\n' + template.bottom);
+      objOut.textOut = prettyHtml(fixTitleTag(template.top) + '\n' + $(options.selector).html() + '\n' + template.bottom);
       objOut.templateUsed = template.name;
    }
 
