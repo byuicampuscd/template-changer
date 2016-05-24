@@ -17,13 +17,15 @@ function processTemplate(name, text, options, templates) {
       },
       hasMatchInFile;
 
-   function fixTitleTag(templateTopIn){
-      var templateTop = htmlParse.load(templateTopIn),
-          title = templateTop('title');
-      if(title.length > 0){
+   function parseTitlename(title) {
+      var tiParsed = path.parse(title);
+      return tiParsed.name;
+   }
 
-         title.text(name);
-      }
+   function fixTitleTag(templateTopIn){
+      var templateTop = htmlParse.load(templateTopIn);
+      templateTop('title').first().text(parseTitlename(name));
+      return templateTop.html();
    }
 
    function run(template) {
