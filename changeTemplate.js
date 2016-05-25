@@ -3,7 +3,8 @@
 
 var htmlParse = require('cheerio'),
    prettyHtml = require('js-beautify').html,
-   enums = require('./enums.js');
+   enums = require('./enums.js'),
+    path = require('path');
 
 function processTemplate(name, text, options, templates) {
 
@@ -16,8 +17,19 @@ function processTemplate(name, text, options, templates) {
       },
       hasMatchInFile;
 
+   function parseTitlename(title) {
+      var tiParsed = path.parse(title);
+      return tiParsed.name;
+   }
+
+   function fixTitleTag(templateTopIn){
+      var templateTop = htmlParse.load(templateTopIn);
+      templateTop('title').first().text(parseTitlename(name));
+      return templateTop.html();
+   }
+
    function run(template) {
-      objOut.textOut = prettyHtml(template.top + '\n' + $(options.selector).html() + '\n' + template.bottom);
+      objOut.textOut = prettyHtml(fixTitleTag(template.top) + '\n' + $(options.selector).html() + '\n' + template.bottom);
       objOut.templateUsed = template.name;
    }
 

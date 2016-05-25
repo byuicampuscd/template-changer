@@ -119,6 +119,6 @@
       return;
    }
 
-   //This will read the files, change the template, make the folders and write out the eddited files 
+   //This will read the files, change the template, make the folders and write out the eddited fil
    processTemplate(htmlFileNames, options, templates);
 }());
