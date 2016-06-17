@@ -23,10 +23,12 @@ function processTemplate(name, text, options, templates) {
     }
 
     function fixTitleTag(templateTopIn) {
-        var templateTop = htmlParse.load(templateTopIn);
-        templateTop('title').first().text(parseTitlename(name));
+        //var templateTop = htmlParse.load(templateTopIn);
+        //templateTop('title').first().text(parseTitlename(name));
 //        console.log(templateTop.html().split(/(<\/div>){2}/g)[0]);
-        return templateTop.html().split(/(<\/div>){2}/g)[0];
+        //return templateTop.html().split(/(<\/div>){2}/g)[0];
+        templateTopIn.replace(/<title>[\w\W]*?<\/title>/i,"<title>" + parseTitlename(name) + "</title>")
+        return 
     }
 
     function run(template) {
