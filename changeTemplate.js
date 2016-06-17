@@ -27,8 +27,8 @@ function processTemplate(name, text, options, templates) {
         //templateTop('title').first().text(parseTitlename(name));
 //        console.log(templateTop.html().split(/(<\/div>){2}/g)[0]);
         //return templateTop.html().split(/(<\/div>){2}/g)[0];
-        templateTopIn.replace(/<title>[\w\W]*?<\/title>/i,"<title>" + parseTitlename(name) + "</title>")
-        return 
+        return templateTopIn.replace(/<title>[\w\W]*?<\/title>/i,"<title>" + parseTitlename(name) + "</title>");
+        
     }
 
     function run(template) {
