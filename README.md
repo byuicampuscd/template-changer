@@ -21,4 +21,4 @@ If the HTML files are not all located within the Course Files folder, follow the
 Run `templateChanger` with out any paramiters to see all the ways it can be ran.
 
 ### Multiple Template Change Example
-templateChanger #article IF .splash THEN large.txt ELSE small.txt
+`templateChanger #article IF .splash THEN large.txt ELSE small.txt`
