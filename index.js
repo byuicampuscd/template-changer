@@ -1,124 +1,293 @@
 #!/usr/bin/env node
 
-/*jslint node:true, nomen: true */
-(function () {
-   "use strict";
+/*jslint plusplus: true, node: true, nomen:true*/
+"use strict";
 
-   var fs = require('fs'),
-      path = require('path'),
-      processTemplate = require('./processTemplates.js'),
-      errorHandler = require('./errorHandler.js'),
-      enums = require('./enums.js'),
-      folder = process.cwd(),
-      templates = [],
-      options,
-      htmlFileNames;
+var fs = require('fs'),
+    path = require('path'),
+    errorHandler = require('./errorHandler.js'),
+    chalk = require('chalk');
 
-   function parseTheArgs(argsIn) {
-      var args = argsIn.slice(2),
-         parsed = {
-            err: ''
-         },
-         hasACorrectLength = args.length === 2 || args.length === 5 || args.length === 7;
+function readFile(fileName) {
+    var fileText;
 
-      //check for correct lenghts
-      if (!hasACorrectLength) {
-         parsed.err = 'The parameters are missing or are not in the correct format.';
-         return parsed;
-      }
+    try {
+        fileText = fs.readFileSync(fileName, 'utf8');
+    } catch (e) {
+        throw "Error reading file: " + fileName;
+    }
 
-      //this is always a selector
-      parsed.selector = args[0];
+    return fileText;
+}
 
-      //get the rest
-      if (args.length === 2) {
-         parsed.templateFileName = args[1];
-         parsed.mode = enums.mode.NORMAL;
-      } else if (args.length === 5) {
-         if (args[1].toUpperCase() === 'IF' && args[3].toUpperCase() === 'THEN') {
-            parsed.selectorIf = args[2];
-            parsed.templateFileName = args[4];
-            parsed.mode = enums.mode.IF;
-         } else {
-            parsed.err = 'There are 5 parameters but they are not in the correct format.';
-         }
-      } else if (args.length === 7) {
-         if (args[1].toUpperCase() === 'IF' && args[3].toUpperCase() === 'THEN' && args[5].toUpperCase() === 'ELSE') {
-            parsed.selectorIf = args[2];
-            parsed.templateFileName = args[4];
-            parsed.templateFileNameElse = args[6];
-            parsed.mode = enums.mode.IF_ELSE;
-         } else {
-            parsed.err = 'There are 7 paramitiers but they are not in the correct format.';
-         }
-      }
+function readFiles(file, callback) {
+    fs.readFile(file, 'utf8', function (error, guts) {
+        if (error) {
+            callback(error);
+        }
+        //remember the file name
+        callback(null, {
+            location: file,
+            name: path.parse(file).base,
+            contents: guts
+        });
+    });
+}
 
-      return parsed;
-   }
+function dirExist(dirPath) {
+    //does it exist?
+    try {
+        //yes it does try again
+        fs.statSync(dirPath).isDirectory();
+        return true;
+    } catch (e) {
+        //error nope so does not exist
+        return false;
+    }
+}
 
-   function getTemplate(filename) {
-      var guts = fs.readFileSync(filename, 'utf8'),
-         split = guts.split(/^\s*\|+\s*$/m),
-         objOut = {
-            name: path.basename(filename, '.txt'),
-            top: '',
-            bottom: ''
-         };
+function makeWriteFiles(dirIn) {
+    return function writeFiles(file, callback) {
+        var pathOut,
+            fileTextOut;
+        //do we have errors?
+        if (file.errors.length === 0) {
+            //nope!
+            //set path and text
+            pathOut = path.join(dirIn, file.name);
+            fileTextOut = file.processed;
+        } else {
+            //yep
+            //folder name
+            pathOut = path.join(dirIn, "Missing " + file.errors[0].name);
 
-      //do we have something
-      if (split.length > 0) {
-         objOut.top = split[0];
-         objOut.bottom = split[1];
-      }
+            //if the sub folder does not exist make it
+            if (!dirExist(pathOut)) {
+                fs.mkdirSync(pathOut);
+            }
 
-      return objOut;
-   }
+            //make full path and text out
+            pathOut = path.join(pathOut, file.name);
+            fileTextOut = file.contents;
+        }
 
-   function getHtmlFileNames(folder) {
-      var htmlFileNames = fs.readdirSync(folder);
-      //filter down to just html
-      htmlFileNames = htmlFileNames.filter(function (file) {
-         return path.extname(file) === '.html';
-      });
-      return htmlFileNames;
-   }
-   /********************************************
-    ****************** start ****************
-    *********************************************/
+        //writeit!
+        fs.writeFile(pathOut, fileTextOut, 'utf8', function (err) {
+            if (err) {
+                callback(err);
+            } else {
+                callback(null);
+            }
+        });
+    };
+}
 
-   //new line
-   console.log('');
+function makeMainDir(currentFolder, folderNameIn) {
+    var num = 1,
+        pathOut = path.join(currentFolder, folderNameIn);
+    //this will make sure that 1 does not get appened only greater than 1
 
-   //parse the Aargs
-   options = parseTheArgs(process.argv);
+    //if the folder already exists
+    while (dirExist(pathOut)) {
+        num += 1;
+        pathOut = path.join(currentFolder, folderNameIn + num);
+    }
 
-   //if error give some help and return
-   if (options.err !== '') {
-      //console.log("options:", options);
-      errorHandler.handle(options.err);
-      return;
-   }
+    //found one, make it and return the name
+    fs.mkdirSync(pathOut);
 
-   //Get the templates
-   try {
-      templates.push(getTemplate(options.templateFileName));
-      if (options.mode === enums.mode.IF_ELSE) {
-         templates.push(getTemplate(options.templateFileNameElse));
-      }
-   } catch (e1) {
-      errorHandler.handle('An error occured wile reading a template file.', e1.message);
-      //console.log("templates:", templates);
-      return;
-   }
+    return pathOut;
 
-   //get all the html file names
-   try {
-      htmlFileNames = getHtmlFileNames(folder);
-   } catch (e2) {
-      errorHandler.handle('An error occured wile looking for html files to edit in the current folder.', e2.message);
-      return;
-   }
+}
 
-   //This will read the files, change the template, make the folders and write out the eddited fil
-   processTemplate(htmlFileNames, options, templates);
-}());
+function getHtmlFileNames(folder) {
+    var htmlFileNames = fs.readdirSync(folder);
+    //filter down to just html
+    htmlFileNames = htmlFileNames.filter(function (file) {
+        return path.extname(file) === '.html';
+    });
+    return htmlFileNames;
+}
+
+function parseFlags() {
+    var flags = process.argv.slice(2);
+    //print example template
+    if (flags.length === 1 && flags[0] === '-t') {
+        console.log(readFile(path.join(__dirname, 'templateExample.handlebars')));
+        throw '';
+    }
+
+    //print example vars file
+    if (flags.length === 1 && flags[0] === '-v') {
+        console.log(readFile(path.join(__dirname, 'variablesExample.txt')));
+        throw '';
+    }
+
+    if (flags.length !== 2) {
+        errorHandler.handle("Wrong number of arguments.");
+    }
+    return {
+        variablesFileName: flags[0],
+        templateFileName: flags[1],
+        templateName: path.parse(flags[1]).name
+    };
+}
+
+function makeTemplateFunction(flags) {
+    var Handlebars = require('handlebars'),
+        templateText = readFile(flags.templateFileName).trim();
+
+    if (templateText.length === 0) {
+        errorHandler.handle('The template file "' + flags.templateFileName + '" is empty.');
+    }
+
+    return Handlebars.compile(templateText);
+}
+
+function makeVarsObject(flags) {
+    function ordinalNumber(numIn) {
+        var textOut;
+        if (typeof numIn !== 'number' || !isNaN(numIn)) {
+            throw "Need a number to make an ordinal number. Number given: " + numIn;
+        }
+
+        switch (numIn % 10) {
+        case 1:
+            textOut = numIn + 'st';
+            break;
+        case 2:
+            textOut = numIn + 'nd';
+            break;
+        case 3:
+            textOut = numIn + 'rd';
+            break;
+        default:
+            textOut = numIn + 'th';
+            break;
+
+        }
+    }
+
+    var varsText, vars;
+    varsText = readFile(flags.variablesFileName).trim();
+
+    if (varsText.length === 0) {
+        errorHandler.handle("Variables text file is empty.");
+    }
+
+    //make an array
+    vars = varsText.split('\n');
+
+    //process each line
+    vars = vars.map(function (line, lineIndex) {
+        var isMandatory,
+            split;
+
+        line = line.trim();
+
+        isMandatory = line.charAt(0) === '*';
+
+        if (isMandatory) {
+            //drop the *
+            line = line.substr(1);
+        }
+
+        split = line.split('|');
+
+        if (split.length !== 3) {
+            errorHandler.handle('The ' + ordinalNumber(lineIndex + 1) + ' variable in the file does not have 2 "|" in it.');
+        }
+
+        return {
+            name: split[0].trim(),
+            selector: split[1].trim(),
+            command: split[2].trim(),
+            isMandatory: isMandatory
+        };
+    });
+
+    return vars;
+}
+
+function printCounts(counts) {
+    var errorText = '';
+
+    Object.keys(counts).forEach(function (countKey) {
+        if (countKey !== "workedSuccessfully" && counts[countKey] > 0) {
+            errorText += "Variable: " + countKey + ", " + counts[countKey] + " files";
+        }
+    });
+
+    console.log('');
+    console.log(chalk.green('---------------- Files Successfully Processed --------------------'));
+    console.log("Successfully Processed:", counts.workedSuccessfully, "files");
+    if (errorText !== '') {
+        console.log('');
+        console.log(chalk.red('---------------- Files Missing Mandatory Variables --------------------'));
+        console.log(errorText);
+
+    }
+}
+
+/****************************************************************/
+/*************************** START ******************************/
+/****************************************************************/
+try {
+    var folder = process.cwd(),
+        async = require('async'),
+        runTemplate = require('./runTemplate.js'),
+        flags = parseFlags(),
+        varsArray = makeVarsObject(flags),
+        hbTemplate = makeTemplateFunction(flags),
+        htmlFileNames = getHtmlFileNames(folder);
+
+    async.map(htmlFileNames, readFiles, function (err, results) {
+        if (err) {
+            errorHandler.handle('Problem while reading an html file.', err.message);
+        }
+
+        var processed,
+            outputDir,
+            counts = {
+                workedSuccessfully: 0
+            };
+        //set up counts
+        varsArray.forEach(function (varIn) {
+            if (varIn.isMandatory) {
+                counts[varIn.name] = 0;
+            }
+        });
+
+        processed = results.map(function (fileObj) {
+            //fileObj has a processed prop added and an error prop if needed.
+            runTemplate(fileObj, varsArray, hbTemplate);
+            //also record the success count
+            if (fileObj.errors.length === 0) {
+                counts.workedSuccessfully += 1;
+            } else {
+                counts[fileObj.errors[0].name] += 1;
+            }
+            return fileObj;
+        });
+
+        //make the Dir
+        outputDir = makeMainDir(folder, flags.templateName);
+
+        //write files
+        async.each(processed, makeWriteFiles(outputDir), function (err, results) {
+            if (err) {
+                errorHandler.handle('Problem while writing edited html files.', err.message);
+            }
+
+            //tell them where they ended up!
+            console.log("");
+            console.log(chalk.green("The processed files are located in the following directory:"));
+            console.log(path.relative('.', outputDir));
+            printCounts(counts);
+        });
+    });
+
+} catch (e) {
+    //nothing
+
+}
