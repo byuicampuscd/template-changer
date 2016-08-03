@@ -1,6 +1,6 @@
 {
    "name": "template-changer",
-   "version": "0.1.0",
+   "version": "2.0.0",
    "description": "Give selector and top and bottom files and will switch templates for all html files in the current dir and add the edited files to a new folder",
    "bin": {
       "templateChanger": "index.js"
