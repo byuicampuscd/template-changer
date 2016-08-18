@@ -1,4 +1,4 @@
-*bulk| #article | html
+*middle| #article | html
 *title| #topBar | html
 *bannerSrc| #content img:first-of-type | src
 isSplash| .splash | bool
