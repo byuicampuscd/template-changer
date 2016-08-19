@@ -1,4 +1,4 @@
-//#!/usr/bin/env node
+#!/usr/bin/env node
 
 /*jslint plusplus: true, node: true, nomen:true*/
 "use strict";
