@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /*jslint plusplus: true, node: true, nomen:true*/
 "use strict";
 
@@ -199,7 +197,7 @@ function makeVarsObject(flags) {
             isMandatory: isMandatory
         };
     });
-    console.log("vars:", vars);
+
     return vars;
 }
 

@@ -36,11 +36,18 @@ function makeFileVars(fileObj, varsArray) {
     }
 
     function getText(ele) {
-        return ele.text();
+        if (ele.toArray) {
+            ele = ele.toArray()[0];
+        }
+
+        return $(ele).text();
     }
 
     function getOuterHtml(ele) {
-        return $.html(ele);
+        if (ele.toArray) {
+            ele = ele.toArray()[0];
+        }
+        return $.xml(ele);
     }
 
     function getAttr(ele, attr) {
@@ -48,12 +55,9 @@ function makeFileVars(fileObj, varsArray) {
     }
 
     function getArray(eleIn, funIn, attr) {
-        var arrOut = [];
-        eleIn.each(function (i, ele) {
-            arrOut.push(funIn($(ele), attr));
+        return eleIn.toArray().map(function (ele) {
+            return funIn($(ele), attr);
         });
-
-        return arrOut;
     }
 
     varsArray.forEach(function (varIn) {
