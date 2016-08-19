@@ -4,4 +4,7 @@
 *hasP| p | bool 
 *attrs | p | style | array
 *attr | p | style|
-
+*texts | div | text | array
+*text | div | text 
+*outerHtmls | div | outerHTML | array
+*outerHtml | div | outerHTML 

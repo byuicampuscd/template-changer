@@ -35,6 +35,14 @@ function makeFileVars(fileObj, varsArray) {
         return doesExist(getHtml(ele));
     }
 
+    function getText(ele) {
+        return ele.text();
+    }
+
+    function getOuterHtml(ele) {
+        return $.html(ele);
+    }
+
     function getAttr(ele, attr) {
         return ele.attr(attr);
     }
@@ -53,10 +61,14 @@ function makeFileVars(fileObj, varsArray) {
             funUsed;
 
         //what function are we going to use?
-        if (varIn.command === 'html') {
+        if (varIn.command.toLowerCase() === 'html') {
             funUsed = getHtml;
-        } else if (varIn.command === 'bool') {
+        } else if (varIn.command.toLowerCase() === 'bool') {
             funUsed = getBool;
+        } else if (varIn.command.toLowerCase() === 'text') {
+            funUsed = getText;
+        } else if (varIn.command.toLowerCase() === 'outerhtml') {
+            funUsed = getOuterHtml;
         } else {
             funUsed = getAttr;
         }
