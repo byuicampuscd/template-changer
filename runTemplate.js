@@ -11,8 +11,9 @@ function doesExist(thingIn) {
 
 function checkFileVars(context, varsArray) {
     var errors = [];
+    //make sure it passes doesExist and if it is a bool that it is true
     varsArray.forEach(function (varIn) {
-        if ((varIn.isMandatory && !doesExist(context[varIn.name])) || context[varIn.name] === false) {
+        if (varIn.isMandatory && (!doesExist(context[varIn.name]) || context[varIn.name] === false)) {
             errors.push({
                 name: varIn.name,
                 missing: true
