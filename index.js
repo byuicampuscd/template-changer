@@ -283,4 +283,9 @@ try {
 
 } catch (e) {
     //nothing
+    if (e.message) {
+        console.log(e.message);
+    } else if (typeof e === 'string') {
+        console.log(e);
+    }
 }
