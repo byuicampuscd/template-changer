@@ -26,17 +26,46 @@ function makeFileVars(fileObj, varsArray) {
     var contextOut = {},
         $ = htmlParse.load(fileObj.contents);
 
-    varsArray.forEach(function (varIn) {
-        var selected = $(varIn.selector);
+    function getHtml(ele) {
+        return ele.html();
+    }
 
+    function getBool(ele) {
+        return doesExist(getHtml(ele));
+    }
+
+    function getAttr(ele, attr) {
+        return ele.attr(attr);
+    }
+
+    function getArray(eleIn, funIn, attr) {
+        var arrOut = [];
+        eleIn.each(function (i, ele) {
+            arrOut.push(funIn($(ele), attr));
+        });
+
+        return arrOut;
+    }
+
+    varsArray.forEach(function (varIn) {
+        var selected = $(varIn.selector),
+            funUsed;
+
+        //what function are we going to use?
         if (varIn.command === 'html') {
-            contextOut[varIn.name] = selected.html();
+            funUsed = getHtml;
         } else if (varIn.command === 'bool') {
-            contextOut[varIn.name] = doesExist(selected.html());
+            funUsed = getBool;
         } else {
-            contextOut[varIn.name] = selected.attr(varIn.command);
+            funUsed = getAttr;
         }
 
+        //do we want an array or not?
+        if (varIn.makeArray) {
+            contextOut[varIn.name] = getArray(selected, funUsed, varIn.command);
+        } else {
+            contextOut[varIn.name] = funUsed(selected, varIn.command);
+        }
     });
 
     //add the default helper vars

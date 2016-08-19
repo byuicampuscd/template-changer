@@ -1,0 +1,7 @@
+*pars| p | html | array
+*par | p | html |
+*hasPs| p | bool | array
+*hasP| p | bool 
+*attrs | p | style | array
+*attr | p | style|
+
