@@ -283,5 +283,4 @@ try {
 
 } catch (e) {
     //nothing
-    console.log("e:", e);
 }
