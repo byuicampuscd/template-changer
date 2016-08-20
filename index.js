@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /*jslint plusplus: true, node: true, nomen:true*/
 "use strict";
 
@@ -146,26 +144,19 @@ function makeTemplateFunction(flags) {
 
 function makeVarsObject(flags) {
     function ordinalNumber(numIn) {
-        var textOut;
-        if (typeof numIn !== 'number' || !isNaN(numIn)) {
+        var textOut = numIn,
+            endings = ['th', 'st', 'nd', 'rd'],
+            onesPlace = numIn % 10;
+
+        if (typeof numIn !== 'number' || isNaN(numIn)) {
             throw "Need a number to make an ordinal number. Number given: " + numIn;
         }
-
-        switch (numIn % 10) {
-        case 1:
-            textOut = numIn + 'st';
-            break;
-        case 2:
-            textOut = numIn + 'nd';
-            break;
-        case 3:
-            textOut = numIn + 'rd';
-            break;
-        default:
-            textOut = numIn + 'th';
-            break;
-
+        if (onesPlace > 3) {
+            textOut += endings[0];
+        } else {
+            textOut += endings[onesPlace];
         }
+        return textOut;
     }
 
     var varsText, vars;
@@ -194,14 +185,15 @@ function makeVarsObject(flags) {
 
         split = line.split('|');
 
-        if (split.length !== 3) {
-            errorHandler.handle('The ' + ordinalNumber(lineIndex + 1) + ' variable in the file does not have 2 "|" in it.');
+        if (split.length < 3 || split.length > 4) {
+            errorHandler.handle('The ' + ordinalNumber(lineIndex + 1) + ' variable in the variable file does not have 2 or 3 "|" in it.');
         }
 
         return {
             name: split[0].trim(),
             selector: split[1].trim(),
             command: split[2].trim(),
+            makeArray: (typeof split[3] !== 'undefined' || split[3] === '') && split[3].trim() === 'array',
             isMandatory: isMandatory
         };
     });
@@ -289,5 +281,9 @@ try {
 
 } catch (e) {
     //nothing
-
+    if (e.message) {
+        console.log(e.message);
+    } else if (typeof e === 'string') {
+        console.log(e);
+    }
 }

@@ -11,8 +11,9 @@ function doesExist(thingIn) {
 
 function checkFileVars(context, varsArray) {
     var errors = [];
+    //make sure it passes doesExist and if it is a bool that it is true
     varsArray.forEach(function (varIn) {
-        if ((varIn.isMandatory && !doesExist(context[varIn.name])) || context[varIn.name] === false) {
+        if (varIn.isMandatory && (!doesExist(context[varIn.name]) || context[varIn.name] === false)) {
             errors.push({
                 name: varIn.name,
                 missing: true
@@ -26,17 +27,62 @@ function makeFileVars(fileObj, varsArray) {
     var contextOut = {},
         $ = htmlParse.load(fileObj.contents);
 
-    varsArray.forEach(function (varIn) {
-        var selected = $(varIn.selector);
+    function getHtml(ele) {
+        return ele.html();
+    }
 
-        if (varIn.command === 'html') {
-            contextOut[varIn.name] = selected.html();
-        } else if (varIn.command === 'bool') {
-            contextOut[varIn.name] = doesExist(selected.html());
-        } else {
-            contextOut[varIn.name] = selected.attr(varIn.command);
+    function getBool(ele) {
+        return doesExist(getHtml(ele));
+    }
+
+    function getText(ele) {
+        if (ele.toArray) {
+            ele = ele.toArray()[0];
         }
 
+        return $(ele).text();
+    }
+
+    function getOuterHtml(ele) {
+        if (ele.toArray) {
+            ele = ele.toArray()[0];
+        }
+        return $.xml(ele);
+    }
+
+    function getAttr(ele, attr) {
+        return ele.attr(attr);
+    }
+
+    function getArray(eleIn, funIn, attr) {
+        return eleIn.toArray().map(function (ele) {
+            return funIn($(ele), attr);
+        });
+    }
+
+    varsArray.forEach(function (varIn) {
+        var selected = $(varIn.selector),
+            funUsed;
+
+        //what function are we going to use?
+        if (varIn.command.toLowerCase() === 'html') {
+            funUsed = getHtml;
+        } else if (varIn.command.toLowerCase() === 'bool') {
+            funUsed = getBool;
+        } else if (varIn.command.toLowerCase() === 'text') {
+            funUsed = getText;
+        } else if (varIn.command.toLowerCase() === 'outerhtml') {
+            funUsed = getOuterHtml;
+        } else {
+            funUsed = getAttr;
+        }
+
+        //do we want an array or not?
+        if (varIn.makeArray) {
+            contextOut[varIn.name] = getArray(selected, funUsed, varIn.command);
+        } else {
+            contextOut[varIn.name] = funUsed(selected, varIn.command);
+        }
     });
 
     //add the default helper vars
