@@ -47,7 +47,7 @@ function makeFileVars(fileObj, varsArray) {
         if (ele.toArray) {
             ele = ele.toArray()[0];
         }
-        return $.xml(ele);
+        return $.html(ele);
     }
 
     function getAttr(ele, attr) {
