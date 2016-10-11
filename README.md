@@ -18,7 +18,7 @@ Upload the new HTML files to overwrite the old ones.  Go into the content area o
 If the HTML files are not all located within the Course Files folder, follow the same process but change the file paths to their respective locations.
 
 ## Commands
-Run `templateChanger` with out any paramiters to see all the ways it can be ran.
+Run `templateChanger` with out any parameters to see all the ways it can be ran.
 
 ### Multiple Template Change Example
-`templateChanger #article IF .splash THEN large.txt ELSE small.txt`
+`templateChanger vars.txt template.handlebars`
