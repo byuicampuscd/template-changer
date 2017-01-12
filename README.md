@@ -19,6 +19,3 @@ If the HTML files are not all located within the Course Files folder, follow the
 
 ## Commands
 Run `template-changer` with out any parameters to see all the ways it can be ran.
-
-### Multiple Template Change Example
-`templateChanger vars.txt template.handlebars`
