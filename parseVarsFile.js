@@ -5,7 +5,7 @@ function makeVarsObject(variablesFile) {
             onesPlace = numIn % 10;
 
         if (typeof numIn !== 'number' || isNaN(numIn)) {
-            throw "Need a number to make an ordinal number. Number given: " + numIn;
+            throw 'Need a number to make an ordinal number. Number given: ' + numIn;
         }
         if (onesPlace > 3) {
             textOut += endings[0];
@@ -19,7 +19,7 @@ function makeVarsObject(variablesFile) {
     variablesFile = variablesFile.trim();
 
     if (variablesFile.length === 0) {
-        errorHandler.handle("Variables text file is empty.");
+        throw new Error('Variables text file is empty.');
     }
 
     //make an array
@@ -56,3 +56,5 @@ function makeVarsObject(variablesFile) {
 
     return vars;
 }
+
+module.exports = makeVarsObject;

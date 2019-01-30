@@ -1,17 +1,18 @@
-chalk = require('chalk');
+var chalk = require('chalk'),
+    path = require('path');
 
 function printCounts(counts) {
     var errorText = '';
 
     Object.keys(counts).forEach(function (countKey) {
-        if (countKey !== "workedSuccessfully" && counts[countKey] > 0) {
-            errorText += "Variable: " + countKey + ", " + counts[countKey] + " files";
+        if (countKey !== 'workedSuccessfully' && counts[countKey] > 0) {
+            errorText += 'Variable: ' + countKey + ', ' + counts[countKey] + ' files';
         }
     });
 
     console.log('');
     console.log(chalk.green('---------------- Files Successfully Processed --------------------'));
-    console.log("Successfully Processed:", counts.workedSuccessfully, "files");
+    console.log('Successfully Processed:', counts.workedSuccessfully, 'files');
     if (errorText !== '') {
         console.log('');
         console.log(chalk.red('---------------- Files Missing Mandatory Variables --------------------'));
@@ -27,20 +28,26 @@ function makeCounts(htmlFiles) {
     };
 
     return htmlFiles.reduce(function (counts, file) {
+
         if (file.errors.length === 0) {
             counts.workedSuccessfully += 1;
         } else {
+            if (counts[file.errors[0].name] === undefined) {
+                counts[file.errors[0].name] = 0;
+            }
+
             counts[file.errors[0].name] += 1;
         }
+
         return counts;
     }, counts);
 }
 
 module.exports = function (htmlFiles, outputDir) {
     //tell them where they ended up!
-    console.log("");
-    console.log(chalk.green("The processed files are located in the following directory:"));
+    console.log('');
+    console.log(chalk.green('The processed files are located in the following directory:'));
     console.log(path.relative(process.cwd(), outputDir));
-    var counts = makeCounts(htmlFiles); 
+    var counts = makeCounts(htmlFiles);
     printCounts(counts);
-}
+};

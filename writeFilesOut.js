@@ -1,4 +1,7 @@
-const writeFile = require('write');
+const writeFile = require('write'),
+    fs = require('fs'),
+    path = require('path'),
+    filePrefix = require('./folderPrefix.js');
 
 function dirExist(dirPath) {
     //does it exist?
@@ -15,6 +18,7 @@ function dirExist(dirPath) {
 function makeMainDir(currentFolder, folderNameIn) {
     var num = 1,
         pathOut = path.join(currentFolder, folderNameIn);
+
     //this will make sure that 1 does not get appened only greater than 1
 
     //if the folder already exists
@@ -29,10 +33,12 @@ function makeMainDir(currentFolder, folderNameIn) {
     fs.mkdirSync(pathOut);
 
     return pathOut;
-
 }
 
 module.exports = async function (files, templateFileName) {
+    //just the file name not anything else
+    templateFileName = filePrefix + path.parse(templateFileName).name;
+
     //does a folder named the current template exist?
     const currentFolder = process.cwd(),
         dirOut = makeMainDir(currentFolder, templateFileName);
@@ -42,29 +48,30 @@ module.exports = async function (files, templateFileName) {
 
         //build the file path
         // get relative path
-        let relativePath = path.relative(currentFolder, file.location);
-        pathOut = dirOut,
+        let relativePath = path.relative(currentFolder, file.location),
+            pathOut = dirOut,
             textOut = file.processed;
+
+
 
         //if we have any errors then add in the extra folder 
         //and write the unedited file contents out
         if (file.errors.length > 0) {
-            path.join(pathOut, "Missing " + file.errors[0].name);
+            pathOut = path.join(pathOut, 'Missing ' + file.errors[0].name);
             textOut = file.contents;
         }
 
         //resolve it to get final path out
         pathOut = path.resolve(pathOut, relativePath);
 
-
-        console.log('-------------------');
-        console.log(file.location);
-        console.log(pathOut);
+        // console.log('-------------------');
+        // console.log(file.location);
+        // console.log(pathOut);
 
         //write it
-        await writeFile.promise(pathOut, textOut, 'utf8');
+        await writeFile.promise(pathOut, textOut);
     }
 
     return dirOut;
 
-}
+};
