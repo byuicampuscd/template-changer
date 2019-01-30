@@ -1,5 +1,5 @@
 /*jslint plusplus: true, node: true, nomen:true*/
-"use strict";
+'use strict';
 
 var fs = require('fs'),
     path = require('path'),
@@ -12,7 +12,7 @@ function readFile(fileName) {
     try {
         fileText = fs.readFileSync(fileName, 'utf8');
     } catch (e) {
-        throw "Error reading file: " + fileName;
+        throw 'Error reading file: ' + fileName;
     }
 
     return fileText;
@@ -57,7 +57,7 @@ function makeWriteFiles(dirIn) {
         } else {
             //yep
             //folder name
-            pathOut = path.join(dirIn, "Missing " + file.errors[0].name);
+            pathOut = path.join(dirIn, 'Missing ' + file.errors[0].name);
 
             //if the sub folder does not exist make it
             if (!dirExist(pathOut)) {
@@ -122,7 +122,7 @@ function parseFlags() {
     }
 
     if (flags.length !== 2) {
-        errorHandler.handle("Wrong number of arguments.");
+        errorHandler.handle('Wrong number of arguments.');
     }
     return {
         variablesFileName: flags[0],
@@ -149,7 +149,7 @@ function makeVarsObject(flags) {
             onesPlace = numIn % 10;
 
         if (typeof numIn !== 'number' || isNaN(numIn)) {
-            throw "Need a number to make an ordinal number. Number given: " + numIn;
+            throw 'Need a number to make an ordinal number. Number given: ' + numIn;
         }
         if (onesPlace > 3) {
             textOut += endings[0];
@@ -163,7 +163,7 @@ function makeVarsObject(flags) {
     varsText = readFile(flags.variablesFileName).trim();
 
     if (varsText.length === 0) {
-        errorHandler.handle("Variables text file is empty.");
+        errorHandler.handle('Variables text file is empty.');
     }
 
     //make an array
@@ -205,14 +205,14 @@ function printCounts(counts) {
     var errorText = '';
 
     Object.keys(counts).forEach(function (countKey) {
-        if (countKey !== "workedSuccessfully" && counts[countKey] > 0) {
-            errorText += "Variable: " + countKey + ", " + counts[countKey] + " files";
+        if (countKey !== 'workedSuccessfully' && counts[countKey] > 0) {
+            errorText += 'Variable: ' + countKey + ', ' + counts[countKey] + ' files';
         }
     });
 
     console.log('');
     console.log(chalk.green('---------------- Files Successfully Processed --------------------'));
-    console.log("Successfully Processed:", counts.workedSuccessfully, "files");
+    console.log('Successfully Processed:', counts.workedSuccessfully, 'files');
     if (errorText !== '') {
         console.log('');
         console.log(chalk.red('---------------- Files Missing Mandatory Variables --------------------'));
@@ -272,8 +272,8 @@ try {
             }
 
             //tell them where they ended up!
-            console.log("");
-            console.log(chalk.green("The processed files are located in the following directory:"));
+            console.log('');
+            console.log(chalk.green('The processed files are located in the following directory:'));
             console.log(path.relative('.', outputDir));
             printCounts(counts);
         });

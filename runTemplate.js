@@ -1,9 +1,11 @@
 /*jslint plusplus: true, node: true, devel: true */
-"use strict";
+'use strict';
 
 var htmlParse = require('cheerio'),
     prettyHtml = require('js-beautify').html,
-    errorHandler = require('./errorHandler.js');
+    errorHandler = require('./errorHandler.js'),
+    parseVarsFile = require('./parseVarsFile.js'),
+    parseTemplateFile = require('./parseTemplateFile.js');
 
 function doesExist(thingIn) {
     return typeof thingIn !== 'undefined' && thingIn !== null && thingIn !== '';
@@ -92,7 +94,16 @@ function makeFileVars(fileObj, varsArray) {
 }
 
 module.exports = function runTemplate(fileObj, varsArray, hbTemplate) {
-    //get vars from file
+    //do we need to parse some stuff? this allows the user to send strings that we parse or they can parse them them selfs and then pass in
+    if (typeof hbTemplate === 'string') {
+        hbTemplate = parseTemplateFile(hbTemplate);
+    }
+
+    if (typeof varsArray === 'string') {
+        varsArray = parseVarsFile(varsArray);
+    }
+
+    //pull vars from html file
     var context = makeFileVars(fileObj, varsArray),
         errors = checkFileVars(context, varsArray);
 
